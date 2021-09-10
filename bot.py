@@ -1,12 +1,17 @@
 import telebot
 import requests
+import logging
+
+logger = telebot.logger
 
 from dotenv import dotenv_values
 
 config = dotenv_values(".env")
 
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(config["BOT_TOKEN"])
 
+logger = telebot.logger
+telebot.logger.setLevel(logging.DEBUG)
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
@@ -28,7 +33,7 @@ def ocr_image(message):
     f.close()
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
     url = 'https://api.ocr.space/parse/image'
-    payload = {'apikey': OCR_API_KEY,
+    payload = {'apikey': config["OCR_API_KEY"],
                 'isOverlayRequired': False,
                 'language': 'eng'
             }
