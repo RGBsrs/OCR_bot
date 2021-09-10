@@ -59,7 +59,7 @@ def getMessage():
 @app.route("/")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url=f'https://{HEROKU_APP_NAME}.com/' + BOT_TOKEN)
+    bot.set_webhook(url='https://enigmatic-escarpment-65452.herokuapp.com/' + BOT_TOKEN)
     return "!", 200
 
 if __name__ == "__main__":
