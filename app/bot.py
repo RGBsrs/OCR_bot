@@ -1,17 +1,24 @@
 import telebot
 import requests
 import logging
+import os
+
+from flask import Flask, request
+
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+OCR_API_KEY = os.environ.get("OCR_API_KEY")
+HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
+
 
 logger = telebot.logger
 
-from dotenv import dotenv_values
-
-config = dotenv_values(".env")
-
-bot = telebot.TeleBot(config["BOT_TOKEN"])
+bot = telebot.TeleBot(BOT_TOKEN)
+app = Flask(__name__)
 
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)
+telebot.logger.setLevel(logging.INFO)
+
+
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
@@ -33,7 +40,7 @@ def ocr_image(message):
     f.close()
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
     url = 'https://api.ocr.space/parse/image'
-    payload = {'apikey': config["OCR_API_KEY"],
+    payload = {'apikey': OCR_API_KEY,
                 'isOverlayRequired': False,
                 'language': 'eng'
             }
@@ -41,4 +48,16 @@ def ocr_image(message):
     if resp.status_code == 200:
         bot.send_message(message.chat.id, resp.json()['ParsedResults'][0]['ParsedText'])
 
-bot.polling()
+@app.route('/' + BOT_TOKEN, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+
+@app.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=f'https://{HEROKU_APP_NAME}.com/' + BOT_TOKEN)
+    return "!", 200
