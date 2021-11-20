@@ -38,13 +38,10 @@ def send_welcome(message):
 
 @bot.message_handler(content_types=['photo'])
 def choose_image_language(message):
-    markup = types.ReplyKeyboardMarkup(row_width=3)
-    itembtn1 = types.KeyboardButton('eng')
-    itembtn2 = types.KeyboardButton('rus')
-    itembtn3 = types.KeyboardButton('ger')
-    markup.add(itembtn1, itembtn2, itembtn3)
-    bot.send_message(message.chat.id, "Choose OCR language:", reply_markup=markup)
-    bot.register_next_step_handler(message, ocr_image)
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    markup.add('eng', 'rus','ger')
+    msg = bot.send_message(message.chat.id, "Choose OCR language:", reply_markup=markup)
+    bot.register_next_step_handler(msg, ocr_image)
 
 def ocr_image(message):
     language = message.text
