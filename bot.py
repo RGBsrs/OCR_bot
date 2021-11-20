@@ -3,6 +3,7 @@ import requests
 import logging
 import os
 
+from telebot import types
 from flask import Flask, request
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -22,7 +23,7 @@ telebot.logger.setLevel(logging.INFO)
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
-    bot.reply_to(message, 'Hi')
+    bot.reply_to(message, 'Ready to OCR')
 
 
 # Handle all other messages with content_type 'text' (content_types defaults to ['text'])
@@ -38,6 +39,14 @@ def ocr_image(message):
     f = open('test_image.jpg', 'wb')
     f.write(downloaded_file)
     f.close()
+
+    markup = types.ReplyKeyboardMarkup(row_width=3)
+    itembtn1 = types.KeyboardButton('EN')
+    itembtn2 = types.KeyboardButton('RU')
+    itembtn3 = types.KeyboardButton('DE')
+    markup.add(itembtn1, itembtn2, itembtn3)
+    bot.send_message(message.chat.id, "Choose language:", reply_markup=markup)
+
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
     url = 'https://api.ocr.space/parse/image'
     payload = {'apikey': OCR_API_KEY,
