@@ -41,10 +41,9 @@ def choose_image_language(message):
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     markup.add('eng', 'rus','ger')
     msg = bot.send_message(message.chat.id, "Choose OCR language:", reply_markup=markup)
-    bot.register_next_step_handler(msg, ocr_image)
 
-def ocr_image(message):
     language = message.text
+    
     markup = types.ReplyKeyboardRemove(selective=False)
     bot.send_message(message.chat.id, 'Processing', reply_markup=markup)
 
