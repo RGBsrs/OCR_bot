@@ -3,7 +3,10 @@ import requests
 import logging
 import os
 
+from telebot import types
 from flask import Flask, request
+
+from .services import OcrAPI
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 OCR_API_KEY = os.environ.get("OCR_API_KEY")
@@ -14,24 +17,41 @@ logger = telebot.logger
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
+api = OcrAPI(OCR_API_KEY)
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
-
 
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
     bot.reply_to(message, 'Ready to OCR')
 
+    # markup = types.ReplyKeyboardMarkup(row_width=3)
+    # itembtn1 = types.KeyboardButton('EN')
+    # itembtn2 = types.KeyboardButton('RU')
+    # itembtn3 = types.KeyboardButton('DE')
+    # markup.add(itembtn1, itembtn2, itembtn3)
+    # bot.send_message(message.chat.id, "Choose language:", reply_markup=markup)
 
-# Handle all other messages with content_type 'text' (content_types defaults to ['text'])
-@bot.message_handler(func=lambda message: True)
-def echo_message(message):
-    bot.reply_to(message, message.text)
+    # markup = types.ReplyKeyboardRemove(selective=False)
+    # bot.send_message(message.chat.id, 'Processing', reply_markup=markup)
 
 @bot.message_handler(content_types=['photo'])
+def choose_image_language(message):
+    markup = types.ReplyKeyboardMarkup(row_width=3)
+    itembtn1 = types.KeyboardButton('eng')
+    itembtn2 = types.KeyboardButton('rus')
+    itembtn3 = types.KeyboardButton('ger')
+    markup.add(itembtn1, itembtn2, itembtn3)
+    bot.send_message(message.chat.id, "Choose OCR language:", reply_markup=markup)
+    bot.register_next_step_handler(message, ocr_image)
+
 def ocr_image(message):
+    language = message.text
+    markup = types.ReplyKeyboardRemove(selective=False)
+    bot.send_message(message.chat.id, 'Processing', reply_markup=markup)
+
     photo_id = message.photo[-1].file_id
     photo = bot.get_file(photo_id)
     downloaded_file = bot.download_file(photo.file_path)
@@ -40,14 +60,16 @@ def ocr_image(message):
     f.close()
 
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
-    url = 'https://api.ocr.space/parse/image'
-    payload = {'apikey': OCR_API_KEY,
+    payload = {
                 'isOverlayRequired': False,
-                'language': 'eng'
-            }
-    resp = requests.post(url, data=payload, files=files)
+                'language': language
+                }
+    resp = api.make_request(payload, files)
+
     if resp.status_code == 200:
         bot.send_message(message.chat.id, resp.json()['ParsedResults'][0]['ParsedText'])
+
+
 
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def getMessage():
