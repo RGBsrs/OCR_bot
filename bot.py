@@ -48,7 +48,7 @@ def ocr_image(message):
     bot.send_message(message.chat.id, "Choose language:", reply_markup=markup)
 
     markup = types.ReplyKeyboardRemove(selective=False)
-    bot.send_message(message.chat.id, message, reply_markup=markup)
+    bot.send_message(message.chat.id, 'Processing', reply_markup=markup)
 
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
     url = 'https://api.ocr.space/parse/image'
