@@ -45,7 +45,7 @@ def choose_image_language(message):
     f = open('test_image.jpg', 'wb')
     f.write(downloaded_file)
     f.close()
-    
+
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     markup.add('eng', 'rus', 'ger')
     msg = bot.send_message(message.chat.id, "Choose OCR language:", reply_markup=markup)
@@ -65,6 +65,8 @@ def ocr_image(message):
 
     if resp.status_code == 200:
         bot.send_message(message.chat.id, resp.json()['ParsedResults'][0]['ParsedText'])
+    else:
+        bot.send_message(message.chat.id, 'Something going wrong')
 
 
 
