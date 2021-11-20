@@ -3,7 +3,6 @@ import requests
 import logging
 import os
 
-from telebot import types
 from flask import Flask, request
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -39,16 +38,6 @@ def ocr_image(message):
     f = open('test_image.jpg', 'wb')
     f.write(downloaded_file)
     f.close()
-
-    markup = types.ReplyKeyboardMarkup(row_width=3)
-    itembtn1 = types.KeyboardButton('EN')
-    itembtn2 = types.KeyboardButton('RU')
-    itembtn3 = types.KeyboardButton('DE')
-    markup.add(itembtn1, itembtn2, itembtn3)
-    bot.send_message(message.chat.id, "Choose language:", reply_markup=markup)
-
-    markup = types.ReplyKeyboardRemove(selective=False)
-    bot.send_message(message.chat.id, 'Processing', reply_markup=markup)
 
     files = {'file': ('test_image.jpg', open('test_image.jpg', 'rb'))}
     url = 'https://api.ocr.space/parse/image'
