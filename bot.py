@@ -17,7 +17,7 @@ logger = telebot.logger
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
-api = OcrAPI(OCR_API_KEY)
+api = OcrAPI(api_key=OCR_API_KEY)
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -55,6 +55,7 @@ def ocr_image(message):
     photo_id = message.photo[-1].file_id
     photo = bot.get_file(photo_id)
     downloaded_file = bot.download_file(photo.file_path)
+
     f = open('test_image.jpg', 'wb')
     f.write(downloaded_file)
     f.close()
