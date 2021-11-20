@@ -1,12 +1,11 @@
 import telebot
-import requests
 import logging
 import os
 
 from telebot import types
 from flask import Flask, request
 
-from .services import OcrAPI
+from services import OcrAPI
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 OCR_API_KEY = os.environ.get("OCR_API_KEY")
